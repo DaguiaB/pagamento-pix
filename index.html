@@ -7,14 +7,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-        #qr-code { margin: 20px auto; }
-        #nota-fiscal { display: none; border: 1px solid #000; padding: 10px; margin-top: 20px; }
+        #qr-code, #confirmarPagamento, #nota-fiscal { display: none; margin-top: 20px; }
+        #nota-fiscal { border: 1px solid #000; padding: 10px; }
     </style>
 </head>
 <body>
 
-    <h2>Pagamento via PIX</h2>
-    
+    <h2>Gerar Pagamento via PIX</h2>
+
+    <h3>Dados do Cliente</h3>
     <label>Nome do Cliente:</label>
     <input type="text" id="cliente" placeholder="Nome Completo"><br><br>
 
@@ -24,9 +25,15 @@
     <label>Valor (R$):</label>
     <input type="number" id="valor" placeholder="0.00"><br><br>
 
+    <h3>Dados da Agência</h3>
+    <label>Chave PIX da Agência:</label>
+    <input type="text" id="chavePix" placeholder="E-mail, CPF, CNPJ ou Telefone"><br><br>
+
     <button onclick="gerarQRCode()">Gerar QR Code PIX</button>
 
     <canvas id="qr-code"></canvas>
+
+    <button id="confirmarPagamento" onclick="gerarNotaFiscal()">Confirmar Pagamento</button>
 
     <div id="nota-fiscal">
         <h3>Nota Fiscal</h3>
@@ -43,31 +50,37 @@
             const cliente = document.getElementById("cliente").value;
             const cpf = document.getElementById("cpf").value;
             const valor = document.getElementById("valor").value;
-            if (!cliente || !cpf || !valor) {
+            const chavePix = document.getElementById("chavePix").value;
+
+            if (!cliente || !cpf || !valor || !chavePix) {
                 alert("Preencha todos os campos!");
                 return;
             }
 
-            // Gerando código PIX (Exemplo: Chave Pix fixa + valor + descrição)
-            const chavePix = "SEU-EMAIL@DOMINIO.COM"; // Substitua pela sua chave PIX
-            const urlPix = `pix://00020126330014BR.GOV.BCB.PIX0114${chavePix}520400005303986540${valor}5802BR5925Nome da Agência6008BRASIL62070503***`;
+            // Gerando o código PIX Copia e Cola no formato oficial do Banco Central
+            const payload = `00020126330014BR.GOV.BCB.PIX0114${chavePix}520400005303986540${valor}5802BR5925Nome da Agência6008BRASIL62070503***`;
 
-            // Criando QR Code
-            const qr = new QRious({ element: document.getElementById("qr-code"), value: urlPix, size: 200 });
+            // Criando QR Code apenas agora
+            const qr = new QRious({ element: document.getElementById("qr-code"), value: payload, size: 200 });
 
-            // Simular pagamento após 5 segundos
-            setTimeout(() => {
-                gerarNotaFiscal(cliente, cpf, valor);
-            }, 5000);
+            // Exibindo o QR Code e o botão de confirmação
+            document.getElementById("qr-code").style.display = "block";
+            document.getElementById("confirmarPagamento").style.display = "block";
         }
 
-        function gerarNotaFiscal(cliente, cpf, valor) {
+        function gerarNotaFiscal() {
+            const cliente = document.getElementById("cliente").value;
+            const cpf = document.getElementById("cpf").value;
+            const valor = document.getElementById("valor").value;
             const dataAtual = new Date();
+
             document.getElementById("nf-cliente").textContent = cliente;
             document.getElementById("nf-cpf").textContent = cpf;
             document.getElementById("nf-valor").textContent = valor;
             document.getElementById("nf-data").textContent = dataAtual.toLocaleDateString();
             document.getElementById("nf-hora").textContent = dataAtual.toLocaleTimeString();
+
+            // Exibir a nota fiscal
             document.getElementById("nota-fiscal").style.display = "block";
         }
 
